@@ -1,0 +1,72 @@
+services:
+  neo:
+    image: neo4j:latest
+    ports:
+      - 7474:7474
+      - 7687:7687
+    volumes:
+      - neo4j_data:/data/
+    env_file:
+      - .env.neo4j
+    healthcheck:
+      test: wget http://localhost:7474 || exit 1
+      interval: 1s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - net
+  llm:
+    image: ollama/ollama
+    ports:
+      - 11434:11434
+    volumes:
+      - ollama_data:/ollama-data/
+    networks:
+      - net
+    healthcheck:
+      test: ollama --version || exit 1
+      interval: 1s
+
+  jupyter:
+    build:
+      dockerfile: jupyter.Dockerfile
+    volumes:
+      - jupyter_data:/home/jovyan/work
+    ports:
+      - 8888:8888
+    command: "start-notebook.sh --NotebookApp.token="
+    environment:
+      - MODEL_URI=http://llm:11434
+      - NEO4J_URI=neo4j://neo:7687
+    depends_on:
+      llm:
+        condition: service_healthy
+      neo:
+        condition: service_healthy
+    networks:
+      - net
+
+#  script:
+#    build:
+#      context: .
+#    volumes:
+#      - .:/app
+#    environment:
+#      - MODEL_URI=http://llm:11434
+#      - NEO4J_URI=neo4j://neo:7687
+#    depends_on:
+#      llm:
+#        condition: service_healthy
+##      neo:
+##        condition: service_healthy
+#    networks:
+#      - net
+
+networks:
+  net:
+
+volumes:
+  neo4j_data:
+  ollama_data:
+  jupyter_data:

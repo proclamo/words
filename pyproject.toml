@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "words"
+version = "0.1.0"
+description = ""
+authors = ["proclamo <proclamo@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+langchain = "^0.0.335"
+neo4j = "^5.16.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
